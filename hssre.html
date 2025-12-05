@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hindi Sahitya Sabha | IIT Kanpur</title>
+    <link rel="icon" type="image/png" href="https://mnciitk.github.io/img/logo/hss.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gotu&family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Rozha+One&display=swap" rel="stylesheet">
+
+    <!-- Custom Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#F9F7F2',      
+                        charcoal: '#2C2C2C',   
+                        terracotta: '#E07A5F', 
+                        gold: '#F2CC8F',       
+                        indigo: '#3D405B',     
+                        darkbg: '#1a1a1a',     
+                        darkcard: '#262626',   
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Lato"', 'sans-serif'],
+                        hindiHead: ['"Rozha One"', 'serif'],
+                        hindiBody: ['"Gotu"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { transition: background-color 0.3s ease, color 0.3s ease; }
+        
+        /* Paper Texture */
+        .paper-texture::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 50;
+        }
+
+        /* Drop Cap */
+        .drop-cap::first-letter {
+            font-family: 'Playfair Display', serif; font-size: 3.5rem; float: left;
+            line-height: 0.8; margin-right: 0.5rem; color: #E07A5F;
+        }
+
+        /* Hide Scrollbar but allow scroll */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .pulse-right { animation: pulseRight 1.5s infinite; }
+        @keyframes pulseRight { 0%, 100% { transform: translateX(0); opacity: 0.6; } 50% { transform: translateX(5px); opacity: 1; } }
+
+        #progress-bar { width: 0%; height: 4px; background-color: #E07A5F; position: fixed; top: 0; left: 0; z-index: 100; transition: width 0.1s; }
+    </style>
+</head>
+<body class="bg-paper text-charcoal dark:bg-darkbg dark:text-gray-200 font-sans paper-texture">
+
+    <!-- Reading Progress Bar -->
+    <div id="progress-bar"></div>
+
+    <!-- SEARCH OVERLAY -->
+    <div id="search-overlay" class="fixed inset-0 bg-paper/95 dark:bg-darkbg/95 z-50 hidden flex-col p-6 md:p-20 transition-opacity duration-300">
+        <div class="max-w-4xl mx-auto w-full">
+            <div class="flex justify-between items-center mb-10 border-b border-charcoal dark:border-gray-600 pb-4">
+                <input type="text" id="search-input" placeholder="Search poems..." 
+                    class="w-full bg-transparent text-2xl md:text-4xl font-serif text-charcoal dark:text-white focus:outline-none placeholder-gray-400"
+                    onkeyup="handleSearch()">
+                <button onclick="toggleSearch()" class="text-4xl text-gray-500 hover:text-terracotta transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="search-results" class="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[70vh] no-scrollbar">
+                <p class="text-gray-500 italic">Type to begin searching...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-40 backdrop-blur-md bg-paper/90 dark:bg-darkbg/90 border-b border-gray-200 dark:border-gray-800 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 md:h-20">
+                
+                <!-- Logo & Branding -->
+                <div class="flex-shrink-0 flex items-center cursor-pointer gap-3" onclick="router('home')">
+                    <!-- LOGO with ID for Theme Switching and rounded-full class -->
+                    <img id="nav-logo" src="https://mnciitk.github.io/img/logo/hss.png" alt="HSS Logo" class="h-10 w-10 md:h-12 md:w-12 object-contain drop-shadow-sm transition-opacity duration-300 rounded-full">
+                    
+                    <div class="flex flex-col">
+                        <div class="text-2xl md:text-3xl font-hindiHead text-terracotta font-bold leading-none">हिन्दी साहित्य सभा</div>
+                        <div class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400 font-serif italic tracking-wider leading-none mt-1">
+                            IIT Kanpur
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center font-serif">
+                    <a onclick="router('home')" class="cursor-pointer hover:text-terracotta transition-colors">Home</a>
+                    
+                    <div class="relative group">
+                        <button class="hover:text-terracotta transition-colors flex items-center gap-1">
+                            Literature <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                         <div class="absolute top-full -left-10 w-48 bg-white dark:bg-darkcard shadow-xl rounded-md py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top border border-gray-100 dark:border-gray-700">
+                            <a onclick="filterCategory('Kavita', null)" class="block px-4 py-2 hover:bg-paper dark:hover:bg-gray-700 cursor-pointer">Kavita (Poetry)</a>
+                            <a onclick="filterCategory('Kahani', null)" class="block px-4 py-2 hover:bg-paper dark:hover:bg-gray-700 cursor-pointer">Kahani (Stories)</a>
+                            <a onclick="filterCategory('Vyangya', null)" class="block px-4 py-2 hover:bg-paper dark:hover:bg-gray-700 cursor-pointer">Vyangya (Satire)</a>
+                            <a onclick="filterCategory('Book Review', null)" class="block px-4 py-2 hover:bg-paper dark:hover:bg-gray-700 cursor-pointer">Samiksha (Reviews)</a>
+                            <a oneclick="filterCategory('Ghazal', null)" class="block px-4 py-2 hover:bg-paper dark:hover:bg-gray-700 cursor-pointer">Ghazal</a>
+                            <a onclick="filterCategory('Nazm', null)" class="block px-4 py-2 hover:bg-paper dark:hover:bg-gray-700 cursor-pointer">Nazm</a>
+                            <a onclick="filterCategory('Ekanki', null)" class="block px-4 py-2 hover:bg-paper dark:hover:bg-gray-700 cursor-pointer">Ekanki (One-Act Play)</a>
+                
+                        </div>
+                    </div>
+
+                    <a onclick="router('team')" class="cursor-pointer hover:text-terracotta transition-colors">Our Team</a>
+                    <a onclick="router('submit')" class="cursor-pointer hover:text-terracotta transition-colors">Submit</a>
+                    
+                    <button onclick="toggleDarkMode()" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                        <i id="theme-icon" class="fas fa-moon text-sm"></i>
+                    </button>
+                    
+                    <button onclick="toggleSearch()" class="hover:text-terracotta transition"><i class="fas fa-search"></i></button>
+                </div>
+                 <div>
+        
+               <div class="flex items-center gap-4 mt-4 text-gray-300">
+               <!-- Facebook -->
+                  <a href="https://www.facebook.com/hindi.sahitya.sabha.iitk" target="_blank" rel="noopener noreferrer">
+                  <i class="fab fa-facebook-f text-lg hover:text-white cursor-pointer transition"></i>
+                    </a>
+
+                <!-- Instagram -->
+                  <a href="https://www.instagram.com/hindisahityasabha.iitk/" target="_blank" rel="noopener noreferrer">
+                   <i class="fab fa-instagram text-lg hover:text-white cursor-pointer transition"></i>
+                   </a>
+
+                 <!-- LinkedIn -->
+                   <a href="https://www.linkedin.com/company/hindi-sahitya-sabha-iitk/" target="_blank" rel="noopener noreferrer">
+                   <i class="fab fa-linkedin-in text-lg hover:text-white cursor-pointer transition"></i>
+                   </a>
+                 </div>
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center gap-4">
+                    <button onclick="toggleSearch()" class="text-charcoal dark:text-white"><i class="fas fa-search"></i></button>
+                    <button onclick="toggleDarkMode()" class="text-charcoal dark:text-white"><i class="fas fa-moon"></i></button>
+                    <button onclick="toggleMobileMenu()" class="text-charcoal dark:text-white text-xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+       <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-darkcard border-b border-gray-200 dark:border-gray-700 shadow-lg absolute w-full z-50">
+            <div class="px-4 pt-2 pb-4 space-y-1 font-serif max-h-[80vh] overflow-y-auto">
+                <a onclick="router('home')" class="block px-3 py-3 rounded-md hover:bg-paper dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700">Home</a>
+                <p class="px-3 pt-4 pb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Categories</p>
+                <a onclick="filterCategory('Kavita', null)" class="block px-3 py-2 rounded-md hover:bg-paper dark:hover:bg-gray-700 pl-6 border-l-2 border-terracotta">Kavita (Poetry)</a>
+                <a onclick="filterCategory('Kahani', null)" class="block px-3 py-2 rounded-md hover:bg-paper dark:hover:bg-gray-700 pl-6">Kahani (Stories)</a>
+                <a onclick="filterCategory('Lekh', null)" class="block px-3 py-2 rounded-md hover:bg-paper dark:hover:bg-gray-700 pl-6">Lekh/a>
+                <a onclick="filterCategory('Ekanki', null)" class="block px-3 py-2 rounded-md hover:bg-paper dark:hover:bg-gray-700 pl-6">Ekanki</a>
+                <a onclick="filterCategory('Ghazal', null)" class="block px-3 py-2 rounded-md hover:bg-paper dark:hover:bg-gray-700 pl-6">Ghazal</a>
+                <a onclick="filterCategory('Nazm', null)" class="block px-3 py-2 rounded-md hover:bg-paper dark:hover:bg-gray-700 pl-6">Nazm</a>
+                <a onclick="filterCategory('Book review', null)" class="block px-3 py-2 rounded-md hover:bg-paper dark:hover:bg-gray-700 pl-6">Pustak Samiskha</a>
+                <a onclick="filterCategory('Vyangya', null)" class="block px-3 py-2 rounded-md hover:bg-paper dark:hover:bg-gray-700 pl-6">Vyangya (Satire)</a>
+                <p class="px-3 pt-4 pb-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Club</p>
+                <a onclick="router('about')" class="block px-3 py-3 rounded-md hover:bg-paper dark:hover:bg-gray-700">About Us</a>
+                <a onclick="router('team')" class="block px-3 py-3 rounded-md hover:bg-paper dark:hover:bg-gray-700">Our Team</a>
+                <a onclick="router('submit')" class="block px-3 py-3 rounded-md hover:bg-paper dark:hover:bg-gray-700 text-terracotta font-bold">Submit Entry</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN APP CONTAINER -->
+    <main id="app-container" class="min-h-screen pb-20">
+        
+        <!-- ================= VIEW: HOME ================= -->
+        <div id="view-home" class="fade-in">
+            
+            <!-- Hero Section -->
+            <header class="relative w-full h-auto md:h-[600px] flex flex-col md:flex-row overflow-hidden">
+                
+                <!-- Left Content -->
+                <div class="w-full md:w-1/2 bg-paper dark:bg-darkbg flex flex-col justify-center px-6 md:px-16 py-8 md:py-10 z-10 order-2 md:order-1 border-r border-gray-200 dark:border-gray-800">
+                    <div class="inline-flex items-center gap-2 mb-4 md:mb-6">
+                        <span class="text-terracotta font-serif italic tracking-widest text-xs md:text-sm uppercase">Shabd • Word of the Day</span>
+                    </div>
+                    
+                    <h1 class="text-5xl md:text-7xl font-hindiHead leading-none mb-2 text-charcoal dark:text-gray-100">
+                        जिजीविषा
+                    </h1>
+                    <p class="text-lg md:text-xl font-serif italic text-gray-400 mb-4 md:mb-6">(Jijivisha)</p>
+                    
+                    <div class="border-l-4 border-gold pl-4 md:pl-6 mb-6 md:mb-8">
+                        <p class="text-base md:text-xl text-gray-700 dark:text-gray-300 font-serif leading-relaxed mb-2 md:mb-3">
+                            <strong class="text-terracotta">Meaning:</strong> The strong, eternal desire to live and survive against all odds.
+                        </p>
+                        <p class="text-sm md:text-lg text-gray-500 dark:text-gray-400 font-hindiBody italic">
+                            "विपरीत परिस्थितियों और घोर संकट में भी उसकी जिजीविषा ने उसे हार नहीं मानने दी।"
+                        </p>
+                    </div>
+                    
+                    <div class="flex flex-col items-start gap-4 mt-2">
+                        <!-- About Us Button -->
+                        <button onclick="router('about')" class="text-charcoal dark:text-gray-300 hover:text-terracotta transition text-xs md:text-sm font-serif italic border-b border-gray-400 hover:border-terracotta pb-0.5">
+                            About Hindi Sahitya Sabha &rarr;
+                        </button>
+                        
+                        <!-- Main Button -->
+                        <button onclick="document.getElementById('latest-works').scrollIntoView({behavior: 'smooth'})" class="px-6 md:px-8 py-3 border border-charcoal dark:border-gray-400 rounded-full hover:bg-charcoal hover:text-white dark:hover:bg-white dark:hover:text-black transition duration-300 font-serif text-xs md:text-sm uppercase tracking-widest">
+                            Explore Literature
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Right Image -->
+                <div class="w-full md:w-1/2 h-[30vh] md:h-auto relative order-1 md:order-2">
+                    <img src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=2068&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition duration-700 ease-in-out" alt="Abstract Literature Art">
+                    <div class="absolute inset-0 bg-gradient-to-t from-paper md:from-transparent md:bg-gradient-to-l md:via-transparent to-transparent dark:from-darkbg opacity-90 md:opacity-40"></div>
+                </div>
+            </header>
+
+            <!-- Quick Categories Scroll -->
+            <div class="border-y border-gray-200 dark:border-gray-800 py-4 bg-white dark:bg-darkcard sticky top-16 md:top-20 z-30 shadow-sm relative">
+                <div class="relative max-w-7xl mx-auto">
+                    <div id="category-container" class="px-4 overflow-x-auto no-scrollbar whitespace-nowrap flex gap-3 md:gap-4 md:justify-center items-center" onscroll="hideScrollIndicator()">
+                        
+                        <button id="btn-editor" onclick="filterCategory('Editor', this)" class="cat-btn flex items-center gap-2 px-4 md:px-6 py-2 rounded-full bg-white dark:bg-darkbg hover:bg-terracotta hover:text-white transition text-xs md:text-sm font-serif border border-gold text-indigo dark:text-gold">
+                            <i class="fas fa-star text-xs"></i> Editorial Picks
+                        </button>
+                        
+                         <div class="w-[1px] h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+
+                        <button onclick="filterCategory('All', this)" class="cat-btn px-5 md:px-6 py-2 rounded-full bg-paper dark:bg-gray-700 hover:bg-terracotta hover:text-white transition text-xs md:text-sm font-serif border border-gray-300 dark:border-gray-600">All</button>
+                        <button onclick="filterCategory('Kavita', this)" class="cat-btn px-5 md:px-6 py-2 rounded-full bg-white dark:bg-darkbg hover:bg-terracotta hover:text-white transition text-xs md:text-sm font-hindiBody border border-gray-200 dark:border-gray-700">कविता</button>
+                        <button onclick="filterCategory('Kahani', this)" class="cat-btn px-5 md:px-6 py-2 rounded-full bg-white dark:bg-darkbg hover:bg-terracotta hover:text-white transition text-xs md:text-sm font-hindiBody border border-gray-200 dark:border-gray-700">कहानी</button>
+                        <button onclick="filterCategory('Vyangya', this)" class="cat-btn px-5 md:px-6 py-2 rounded-full bg-white dark:bg-darkbg hover:bg-terracotta hover:text-white transition text-xs md:text-sm font-hindiBody border border-gray-200 dark:border-gray-700">व्यंग्य</button>
+                        <button onclick="filterCategory('Book Review', this)" class="cat-btn px-5 md:px-6 py-2 rounded-full bg-white dark:bg-darkbg hover:bg-terracotta hover:text-white transition text-xs md:text-sm font-hindiBody border border-gray-200 dark:border-gray-700">पुस्तक समीक्षा</button>
+                        <button onclick="filterCategory('Ghazal', this)" class="cat-btn px-5 md:px-6 py-2 rounded-full bg-white dark:bg-darkbg hover:bg-terracotta hover:text-white transition text-xs md:text-sm font-hindiBody border border-gray-200 dark:border-gray-700">ग़ज़ल</button>
+                        <button onclick="filterCategory('Nazm', this)" class="cat-btn px-5 md:px-6 py-2 rounded-full bg-white dark:bg-darkbg hover:bg-terracotta hover:text-white transition text-xs md:text-sm font-hindiBody border border-gray-200 dark:border-gray-700">नज़्म</button>
+                        <button onclick="filterCategory('Ekanki', this)" class="cat-btn px-5 md:px-6 py-2 rounded-full bg-white dark:bg-darkbg hover:bg-terracotta hover:text-white transition text-xs md:text-sm font-hindiBody border border-gray-200 dark:border-gray-700">एकांकी</button>
+                        <button onclick="filterCategory('Article', this)" class="cat-btn px-5 md:px-6 py-2 rounded-full bg-white dark:bg-darkbg hover:bg-terracotta hover:text-white transition text-xs md:text-sm font-hindiBody border border-gray-200 dark:border-gray-700">लेख</button>
+                    </div>
+
+                    <!-- Scroll Indicator -->
+                    <div id="scroll-indicator" class="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white dark:from-darkcard to-transparent flex items-center justify-end pr-2 md:hidden pointer-events-none transition-opacity duration-300">
+                        <i class="fas fa-chevron-right text-terracotta pulse-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <section id="latest-works" class="max-w-7xl mx-auto px-3 md:px-6 lg:px-8 py-10 md:py-16">
+                <!-- SORT CONTROL HEADER -->
+                <div class="flex items-end justify-between mb-6 md:mb-10">
+                    <div class="flex items-center gap-2 md:gap-4">
+                        <span class="text-xs md:text-sm text-gray-500 font-serif uppercase tracking-widest">Sorted by:</span>
+                        <button id="sort-date" onclick="changeSort('date')" class="text-sm md:text-base font-serif text-terracotta border-b-2 border-terracotta transition-colors hover:text-charcoal dark:hover:text-white">Date Published</button>
+                        <span class="text-gray-300">|</span>
+                        <button id="sort-name" onclick="changeSort('name')" class="text-sm md:text-base font-serif text-gray-500 hover:text-terracotta transition-colors">Name</button>
+                    </div>
+                    <span class="text-xs md:text-sm text-gray-500 italic font-serif hidden sm:block">Curated by HSS IITK</span>
+                </div>
+
+                <div id="posts-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8">
+                    <!-- Posts will be injected here by JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= VIEW: ABOUT ================= -->
+        <div id="view-about" class="hidden fade-in max-w-4xl mx-auto px-4 py-16 min-h-screen">
+             <div class="text-center mb-12">
+                <h1 class="text-4xl md:text-5xl font-hindiHead mb-4 text-terracotta">About Us</h1>
+                <p class="text-xl font-serif italic text-gray-500">The custodians of Hindi Literature at IIT Kanpur.</p>
+            </div>
+            <div class="prose prose-lg dark:prose-invert mx-auto font-hindiBody leading-relaxed">
+                <p>
+                    <strong>Hindi Sahitya Sabha (HSS)</strong> is one of the oldest and most prestigious cultural clubs of IIT Kanpur. Established with the vision of preserving and promoting the rich heritage of Hindi literature, the club serves as a creative sanctuary for students.
+                </p>
+                <p>
+                    We organize poetry recitations (Kavi Sammelan), literary debates, writing workshops, and guest lectures by renowned authors. Our mission is to prove that language is not just a medium of communication, but a vehicle of culture and emotion.
+                </p>
+                <p>
+                    From the rustic charm of Premchand's stories to the fire of Dinkar's poetry, HSS celebrates every facet of Hindi literature. Join us in this journey of words, emotions, and expressions.
+                </p>
+            </div>
+            <div class="mt-12 text-center">
+                <button onclick="router('home')" class="px-6 py-2 border border-charcoal dark:border-gray-400 rounded-full hover:bg-charcoal hover:text-white transition">Back to Home</button>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: READING ================= -->
+        <div id="view-read" class="hidden fade-in bg-white dark:bg-darkcard min-h-screen">
+            <div class="max-w-3xl mx-auto px-6 pt-8">
+                <button onclick="router('home')" class="text-terracotta hover:text-charcoal dark:hover:text-white transition font-serif italic flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i> Back to Library
+                </button>
+            </div>
+            <article id="article-content" class="max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10">
+                <!-- Content JS -->
+            </article>
+            <div class="max-w-3xl mx-auto px-6 pb-16 border-t border-gray-200 dark:border-gray-700 pt-8">
+                <h3 class="font-serif text-xl mb-4">Share this piece</h3>
+                <div class="flex gap-4 text-gray-500">
+                    <i class="fab fa-facebook text-2xl hover:text-terracotta cursor-pointer"></i>
+                    <i class="fab fa-twitter text-2xl hover:text-terracotta cursor-pointer"></i>
+                    <i class="fab fa-whatsapp text-2xl hover:text-terracotta cursor-pointer"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: TEAM ================= -->
+        <div id="view-team" class="hidden fade-in max-w-7xl mx-auto px-4 py-16">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-serif mb-4">The Custodians</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto">Meet the team dedicated to keeping the flame of Hindi literature alive at IIT Kanpur.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" id="team-grid">
+                <!-- JS Injected -->
+            </div>
+        </div>
+
+        <!-- ================= VIEW: SUBMIT ================= -->
+        <div id="view-submit" class="hidden fade-in max-w-3xl mx-auto px-4 py-16">
+            <div class="bg-white dark:bg-darkcard p-8 md:p-12 shadow-lg rounded-sm border-t-4 border-terracotta">
+                <h2 class="text-3xl font-serif mb-2">Submit Your Creation</h2>
+                <p class="text-gray-500 mb-8">Share your poems, stories, or articles with the campus community.</p>
+                <form class="space-y-6" onsubmit="event.preventDefault(); alert('Thank you! Your submission has been received.'); router('home');">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <input type="text" class="w-full bg-paper dark:bg-darkbg border border-gray-300 dark:border-gray-600 p-3 focus:outline-none focus:border-terracotta transition" placeholder="Your Name">
+                        <input type="email" class="w-full bg-paper dark:bg-darkbg border border-gray-300 dark:border-gray-600 p-3 focus:outline-none focus:border-terracotta transition" placeholder="Email Address">
+                    </div>
+                    <input type="text" class="w-full bg-paper dark:bg-darkbg border border-gray-300 dark:border-gray-600 p-3 focus:outline-none focus:border-terracotta transition" placeholder="Title">
+                     <select class="w-full bg-paper dark:bg-darkbg border border-gray-300 dark:border-gray-600 p-3 focus:outline-none focus:border-terracotta transition">
+                           <option>Kavita (Poetry)</option>
+                            <option>Kahani (Story)</option>
+                            <option>Vyangya (Satire)</option>
+                            <option>Article</option>
+                            <option>Book Review</option>
+                            <option>Ekanki (One-Act Play)</option>
+                            <option>Ghazal</option>
+                            <option>Nazm</option>
+                            <option>Book Review</option>
+                            <optgion>Other</option>
+                        </select>
+                    <textarea rows="6" class="w-full bg-paper dark:bg-darkbg border border-gray-300 dark:border-gray-600 p-3 focus:outline-none focus:border-terracotta transition" placeholder="Content..."></textarea>
+                    <button type="submit" class="w-full bg-terracotta text-white font-serif uppercase tracking-widest py-4 hover:bg-indigo transition duration-300 shadow-md">
+                        Submit Entry
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-indigo text-white pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 border-b border-gray-600 pb-12">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                         <!-- LOGO with rounded-full class -->
+                         <img src="https://mnciitk.github.io/img/logo/hss.png" alt="HSS Logo" class="h-10 w-10 object-contain brightness-0 invert opacity-80 rounded-full">
+                         <h3 class="text-2xl font-hindiHead text-gold">हिन्दी साहित्य सभा</h3>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed font-hindiBody mb-4">
+                        IIT Kanpur's premier literary body dedicated to the promotion and appreciation of Hindi literature.
+                    </p>
+                    <div class="text-sm text-gray-400 font-sans">
+                        <p class="mb-1"><i class="fas fa-envelope mr-2"></i> hss@iitk.ac.in</p>
+                        <p><i class="fas fa-map-marker-alt mr-2"></i> New SAC, IIT Kanpur</p>
+                    </div>
+                </div>
+                <div class="bg-white/5 p-6 rounded-sm border-l-4 border-terracotta">
+                    <span class="text-xs uppercase tracking-widest text-gray-400">Suvichar</span>
+                    <h4 class="text-xl md:text-2xl font-hindiHead mt-2 mb-1 text-white">"साहित्य समाज का दर्पण ही नहीं, दीपक भी है।"</h4>
+                    <p class="text-right text-gold italic font-serif mt-2 text-sm">— मुंशी प्रेमचंद</p>
+                </div>
+                <div>
+                    <h4 class="font-serif text-lg mb-4 text-gold">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-300 text-sm">
+                        <li><a onclick="router('home')" class="cursor-pointer hover:text-white transition">Home</a></li>
+                        <li><a onclick="router('about')" class="cursor-pointer hover:text-white transition">About Us</a></li>
+                        <li><a onclick="router('team')" class="cursor-pointer hover:text-white transition">Our Team</a></li>
+                        <li><a href="#" class="cursor-pointer hover:text-white transition">Contact Coordinators</a></li>
+                    </ul>
+                </div>
+                 <div>
+              Follow us on:
+               <div class="flex items-center gap-4 mt-4 text-gray-300">
+               <!-- Facebook -->
+                  <a href="https://www.facebook.com/hindi.sahitya.sabha.iitk" target="_blank" rel="noopener noreferrer">
+                  <i class="fab fa-facebook-f text-lg hover:text-white cursor-pointer transition"></i>
+                    </a>
+
+                <!-- Instagram -->
+                  <a href="https://www.instagram.com/hindisahityasabha.iitk/" target="_blank" rel="noopener noreferrer">
+                   <i class="fab fa-instagram text-lg hover:text-white cursor-pointer transition"></i>
+                   </a>
+
+                 <!-- LinkedIn -->
+                   <a href="https://www.linkedin.com/company/hindi-sahitya-sabha-iitk/" target="_blank" rel="noopener noreferrer">
+                   <i class="fab fa-linkedin-in text-lg hover:text-white cursor-pointer transition"></i>
+                   </a>
+                 </div>
+            </div>
+            <div class="pt-8 text-center text-gray-500 text-xs font-sans">
+                &copy; 2025 Hindi Sahitya Sabha, IIT Kanpur.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA STORE (Transliterated/Translated to Hindi) ---
+        // Added 'timestamp' for sorting by date (simulated)
+        const posts = [
+            {
+                id: 1,
+                title: "सूरज का सातवाँ घोड़ा",
+                category: "Book Review",
+                author: "सम्यक जैन",
+                date: "Oct 12",
+                timestamp: 1728691200000, 
+                readTime: "5m",
+                isEditorPick: true,
+                image: "https://images.unsplash.com/photo-1519791883288-dc8bd696e667?q=80&w=1000&auto=format&fit=crop",
+                excerpt: "धर्मवीर भारती का यह उपन्यास केवल प्रेम कहानियों का संग्रह नहीं है...",
+                content: "<p>Book review content here...</p>"
+            },
+            {
+                id: 2,
+                title: "दिसम्बर की वो रात",
+                category: "Kahani",
+                author: "अनन्या गुप्ता",
+                date: "Dec 05",
+                timestamp: 1733356800000,
+                readTime: "8m",
+                isEditorPick: false,
+                image: "https://images.unsplash.com/photo-1470116073782-48ae243f709d?q=80&w=1000&auto=format&fit=crop",
+                excerpt: "कानपुर की सर्दी और ओएटी की सीढ़ियों पर बैठी वह...",
+                content: "<p>Story content here...</p>"
+            },
+            {
+                id: 3,
+                title: "तुम, मैं और चाय",
+                category: "Kavita",
+                author: "रजत वर्मा",
+                date: "Jan 15",
+                timestamp: 1736899200000,
+                readTime: "2m",
+                isEditorPick: true,
+                image: "https://images.unsplash.com/photo-1515542706656-8e6ef17a1521?q=80&w=1000&auto=format&fit=crop",
+                excerpt: "भाप उड़ती चाय की प्याली में, मैंने अक्सर...",
+                content: "<p>Poem content here...</p>"
+            },
+            {
+                id: 4,
+                title: "आधुनिक जीवन की विडंबना",
+                category: "Vyangya",
+                author: "कार्तिक स.",
+                date: "Nov 22",
+                timestamp: 1732233600000,
+                readTime: "4m",
+                isEditorPick: false,
+                image: "https://images.unsplash.com/photo-1520032525096-7bd04a94b5a4?q=80&w=1000&auto=format&fit=crop",
+                excerpt: "हम घंटों स्क्रॉल करते हैं, कुछ देखने के लिए...",
+                content: "<p>Satire content here...</p>"
+            },
+            {
+                id: 5,
+                title: "रश्मिरथी: सर्ग 3",
+                category: "Kavita",
+                author: "राहुल",
+                date: "Aug 15",
+                timestamp: 1723680000000,
+                readTime: "Audio",
+                isEditorPick: true,
+                isAudio: true,
+                image: "https://images.unsplash.com/photo-1513569771920-c9e1d31714af?q=80&w=1000&auto=format&fit=crop",
+                excerpt: "वर्षों तक वन में घूम-घूम, बाधा-विघ्नों को चूम-चूम...",
+                content: "<p>Poetry content here...</p>"
+            },
+             {
+                id: 6,
+                title: "शहर और यादें",
+                category: "Ghazal",
+                author: "प्रिया सिंह",
+                date: "Sep 10",
+                timestamp: 1725926400000,
+                readTime: "3m",
+                isEditorPick: false,
+                image: "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?q=80&w=1000&auto=format&fit=crop",
+                excerpt: "दीवारों से बातें करना अब आदत सी हो गई है...",
+                content: "<p>Ghazal content here...</p>"
+            }
+        ];
+
+        const teamData = [
+            { name: "आरव शर्मा", role: "Coordinator", img: "https://randomuser.me/api/portraits/men/32.jpg" },
+            { name: "ईशा पटेल", role: "Coordinator", img: "https://randomuser.me/api/portraits/women/44.jpg" },
+            { name: "विक्रम सिंह", role: "Coordinator", img: "https://randomuser.me/api/portraits/men/86.jpg" },
+            { name: "Neha Gupta", role: "Coordinator", img: "https://randomuser.me/api/portraits/women/65.jpg" },
+        ];
+
+        // Global State for Filters
+        let currentSort = 'date'; // 'date' or 'name'
+        let currentCategory = 'Editor';
+
+        // --- CORE FUNCTIONS ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const editorBtn = document.getElementById('btn-editor');
+            
+            // Initial render without scrolling
+            filterCategory('Editor', editorBtn, true); 
+            
+            renderTeam();
+            checkTheme();
+            setupScrollProgress();
+        });
+
+        function hideScrollIndicator() {
+            const indicator = document.getElementById('scroll-indicator');
+            if(indicator) {
+                indicator.style.opacity = '0';
+                setTimeout(() => { indicator.style.display = 'none'; }, 300);
+            }
+        }
+
+        function router(viewName) {
+            ['view-home', 'view-read', 'view-team', 'view-submit', 'view-about'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            window.scrollTo(0, 0);
+            document.getElementById('mobile-menu').classList.add('hidden');
+            document.getElementById('search-overlay').classList.add('hidden');
+            document.getElementById('search-overlay').classList.remove('flex');
+        }
+
+        function changeSort(type) {
+            currentSort = type;
+            // Update UI styles for sort buttons
+            const dateBtn = document.getElementById('sort-date');
+            const nameBtn = document.getElementById('sort-name');
+            
+            if (type === 'date') {
+                dateBtn.classList.remove('text-gray-500', 'hover:text-terracotta');
+                dateBtn.classList.add('text-terracotta', 'border-b-2', 'border-terracotta');
+                
+                nameBtn.classList.add('text-gray-500', 'hover:text-terracotta');
+                nameBtn.classList.remove('text-terracotta', 'border-b-2', 'border-terracotta');
+            } else {
+                nameBtn.classList.remove('text-gray-500', 'hover:text-terracotta');
+                nameBtn.classList.add('text-terracotta', 'border-b-2', 'border-terracotta');
+                
+                dateBtn.classList.add('text-gray-500', 'hover:text-terracotta');
+                dateBtn.classList.remove('text-terracotta', 'border-b-2', 'border-terracotta');
+            }
+            
+            // Re-render current category with new sort
+            // We pass the current category logic but reusing the filterCategory function logic
+            // Ideally we'd separate filter and render, but for simplicity:
+            filterCategory(currentCategory, null, true); // true = prevent scroll to keep focus on sort menu
+        }
+
+        function sortPosts(postsToSort) {
+            if (currentSort === 'date') {
+                // Sort by timestamp descending (newest first)
+                // Note: Dummy timestamps are set manually for demo
+                return postsToSort.sort((a, b) => b.timestamp - a.timestamp);
+            } else {
+                // Sort by Title (Name) Alphabetically (Hindi compatible)
+                return postsToSort.sort((a, b) => a.title.localeCompare(b.title, 'hi'));
+            }
+        }
+
+        function renderPosts(data) {
+            const grid = document.getElementById('posts-grid');
+            grid.innerHTML = '';
+            
+            // Sort data before rendering
+            const sortedData = sortPosts([...data]);
+
+            sortedData.forEach(post => {
+                const audioBadge = post.isAudio ? '<span class="absolute top-2 right-2 bg-white/90 dark:bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded-full text-[10px] font-bold text-terracotta"><i class="fas fa-headphones"></i></span>' : '';
+                
+                let catColor = 'bg-indigo text-white';
+                if(post.category === 'Kavita') catColor = 'bg-terracotta text-white';
+                if(post.category === 'Vyangya') catColor = 'bg-gold text-charcoal';
+
+                const card = `
+                    <div class="bg-white dark:bg-darkcard rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-transparent hover:border-terracotta/30 group cursor-pointer flex flex-col h-full" onclick="openPost(${post.id})">
+                        <div class="relative h-32 md:h-56 overflow-hidden w-full flex-shrink-0">
+                            <img src="${post.image}" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700" alt="${post.title}">
+                            ${audioBadge}
+                        </div>
+                        <div class="p-3 md:p-6 flex flex-col flex-grow">
+                            <div class="flex items-center justify-between mb-1 md:mb-3">
+                                <span class="${catColor} text-[8px] md:text-[10px] uppercase tracking-widest px-1.5 py-0.5 rounded-sm">${post.category}</span>
+                                <span class="text-[10px] md:text-xs text-gray-400 font-serif hidden md:block">${post.readTime}</span>
+                            </div>
+                            <h3 class="text-sm md:text-2xl font-hindiHead leading-tight md:leading-snug mb-1 md:mb-2 group-hover:text-terracotta transition text-charcoal dark:text-gray-100 line-clamp-2">${post.title}</h3>
+                            <p class="text-gray-500 dark:text-gray-400 text-xs md:text-sm font-hindiBody line-clamp-2 md:line-clamp-3 mb-2 md:mb-4 leading-relaxed flex-grow hidden md:block">${post.excerpt}</p>
+                            <div class="flex items-center border-t border-gray-100 dark:border-gray-700 pt-2 md:pt-4 mt-auto">
+                                <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-200 flex items-center justify-center text-[10px] md:text-xs font-bold text-gray-600 overflow-hidden">
+                                    ${post.author.charAt(0)}
+                                </div>
+                                <div class="ml-2 md:ml-3">
+                                    <p class="text-[10px] md:text-xs font-bold text-charcoal dark:text-gray-300 uppercase tracking-wider truncate w-20 md:w-auto">${post.author}</p>
+                                    <p class="text-[8px] md:text-[10px] text-gray-400 block md:hidden">${post.date}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        }
+
+        function openPost(id) {
+            const post = posts.find(p => p.id === id);
+            if(!post) return;
+            const container = document.getElementById('article-content');
+            container.innerHTML = `
+                <div class="text-center mb-6 md:mb-12">
+                    <span class="text-terracotta text-xs md:text-sm uppercase tracking-widest font-serif">${post.category}</span>
+                    <h1 class="text-3xl md:text-5xl font-hindiHead mt-2 md:mt-4 mb-4 md:mb-6 leading-tight text-charcoal dark:text-gray-100">${post.title}</h1>
+                    <div class="flex items-center justify-center gap-4 text-xs md:text-sm text-gray-500 font-serif italic">
+                        <span>By ${post.author}</span>
+                        <span>•</span>
+                        <span>${post.date}</span>
+                    </div>
+                </div>
+                <div class="w-full h-48 md:h-96 overflow-hidden rounded-lg mb-6 md:mb-10 shadow-md">
+                    <img src="${post.image}" class="w-full h-full object-cover" alt="${post.title}">
+                </div>
+                <div class="prose prose-sm md:prose-lg dark:prose-invert max-w-none font-hindiBody text-gray-700 dark:text-gray-300 leading-loose">
+                    ${post.content}
+                </div>
+            `;
+            router('read');
+        }
+
+        function filterCategory(cat, btnElement, preventScroll = false) {
+            router('home');
+            
+            // Only scroll if explicit (not init or sort change)
+            if (!preventScroll) {
+                document.getElementById('latest-works').scrollIntoView({behavior: 'smooth'});
+            }
+            
+            currentCategory = cat;
+
+            if (cat === 'All') {
+                renderPosts(posts);
+            } else if (cat === 'Editor') {
+                const filtered = posts.filter(p => p.isEditorPick === true);
+                renderPosts(filtered);
+            } else {
+                const filtered = posts.filter(p => p.category === cat || (cat === 'Book Review' && p.category === 'Book Review'));
+                renderPosts(filtered);
+            }
+
+            if(btnElement) {
+                const allBtns = document.querySelectorAll('.cat-btn');
+                allBtns.forEach(btn => {
+                    btn.classList.remove('bg-paper', 'dark:bg-gray-700', 'active-cat', 'border-gray-300', 'dark:border-gray-600');
+                    btn.classList.add('bg-white', 'dark:bg-darkbg', 'border-gray-200', 'dark:border-gray-700');
+                });
+                btnElement.classList.remove('bg-white', 'dark:bg-darkbg', 'border-gray-200', 'dark:border-gray-700');
+                btnElement.classList.add('bg-paper', 'dark:bg-gray-700', 'active-cat', 'border-gray-300', 'dark:border-gray-600');
+            }
+        }
+
+        function renderTeam() {
+            const container = document.getElementById('team-grid');
+            container.innerHTML = '';
+            teamData.forEach(member => {
+                container.innerHTML += `
+                    <div class="group text-center">
+                        <div class="relative w-32 h-32 md:w-48 md:h-48 mx-auto mb-4 rounded-full overflow-hidden border-4 border-paper shadow-lg">
+                            <img src="${member.img}" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition duration-500" alt="${member.name}">
+                        </div>
+                        <h3 class="text-lg md:text-xl font-serif text-charcoal dark:text-white">${member.name}</h3>
+                        <p class="text-terracotta text-xs md:text-sm uppercase tracking-widest mt-1">${member.role}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleSearch() {
+            const overlay = document.getElementById('search-overlay');
+            const input = document.getElementById('search-input');
+            
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                input.focus();
+                input.value = '';
+                handleSearch();
+            } else {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+        }
+
+        function normalizeText(text) {
+    // Normalize Unicode and trim spaces
+    return text.normalize("NFC").trim();
+}
+
+function handleSearch() {
+    const query = normalizeText(document.getElementById('search-input').value);
+    const resultsContainer = document.getElementById('search-results');
+    resultsContainer.innerHTML = '';
+
+    if (query.length === 0) {
+        resultsContainer.innerHTML = '<p class="text-gray-500 italic">Type to begin searching...</p>';
+        return;
+    }
+
+    const filtered = posts.filter(post => {
+        const title = normalizeText(post.title);
+        const author = normalizeText(post.author);
+        const category = normalizeText(post.category);
+
+        return (
+            title.includes(query) ||
+            author.includes(query) ||
+            category.includes(query)
+        );
+    });
+
+    if (filtered.length === 0) {
+        resultsContainer.innerHTML = '<p class="text-gray-500 italic">No results found.</p>';
+        return;
+    }
+
+    filtered.forEach(post => {
+        const resultItem = `
+            <div onclick="openPost(${post.id}); toggleSearch()" 
+                 class="flex items-center p-4 bg-white dark:bg-gray-800 rounded-lg 
+                        hover:bg-paper dark:hover:bg-gray-700 cursor-pointer transition 
+                        border border-transparent hover:border-terracotta">
+                <img src="${post.image}" class="w-16 h-16 object-cover rounded-md mr-4" alt="${post.title}">
+                <div>
+                    <h4 class="text-lg font-hindiHead text-charcoal dark:text-white">${post.title}</h4>
+                    <p class="text-sm text-terracotta">${post.category} • ${post.author}</p>
+                </div>
+            </div>
+        `;
+        resultsContainer.innerHTML += resultItem;
+    });
+}
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeUI(isDark);
+        }
+
+        function checkTheme() {
+            let isDark = false;
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                isDark = true;
+            }
+            updateThemeUI(isDark);
+        }
+
+        function updateThemeUI(isDark) {
+            const icon = document.getElementById('theme-icon');
+            const logo = document.getElementById('nav-logo');
+            
+            if(isDark) {
+                icon.classList.remove('fa-moon'); 
+                icon.classList.add('fa-sun');
+                // Dark Mode Logo
+                logo.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXhcWb6Qtxf7uNJ56-wroBshCp8M0R--oY3Q&s";
+            } else {
+                icon.classList.remove('fa-sun'); 
+                icon.classList.add('fa-moon');
+                // Light Mode Logo
+                logo.src = "https://mnciitk.github.io/img/logo/hss.png";
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function setupScrollProgress() {
+            window.onscroll = function() {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                document.getElementById("progress-bar").style.width = scrolled + "%";
+            };
+        }
+    </script>
+</body>
+</html>
